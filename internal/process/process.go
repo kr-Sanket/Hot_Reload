@@ -54,6 +54,8 @@ func (p *Manager) Stop() {
 		log.Println("Server already stopped")
 	}
 
+	p.cmd.Wait()
+
 	p.cmd = nil
 }
 
