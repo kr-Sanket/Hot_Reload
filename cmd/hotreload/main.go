@@ -7,6 +7,7 @@ import (
 	"github.com/kr-Sanket/hotreload/internal/builder"
 	"github.com/kr-Sanket/hotreload/internal/config"
 	"github.com/kr-Sanket/hotreload/internal/debounce"
+	"github.com/kr-Sanket/hotreload/internal/loghub"
 	"github.com/kr-Sanket/hotreload/internal/process"
 	"github.com/kr-Sanket/hotreload/internal/watcher"
 )
@@ -17,6 +18,14 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// Start log hub + dashboard
+	hub := loghub.New()
+	loghub.StartServer(hub)
+
+	msg := "HotReload log dashboard running at http://localhost:8090"
+	log.Println(msg)
+	hub.Publish(msg)
 
 	w, err := watcher.New()
 	if err != nil {
@@ -35,31 +44,65 @@ func main() {
 
 	go w.Start()
 
-	log.Println("Watcher started")
+	msg = "Watcher started"
+	log.Println(msg)
+	hub.Publish(msg)
 
+	// Initial build (required by assignment)
 	err = b.Build()
 	if err != nil {
-		log.Println("Initial build failed")
+
+		msg = "Initial build failed"
+		log.Println(msg)
+		hub.Publish(msg)
+
 	} else {
-		p.Start()
+
+		msg = "Initial build successful"
+		log.Println(msg)
+		hub.Publish(msg)
+
+		err = p.Start()
+		if err != nil {
+			log.Println("Failed to start server:", err)
+		}
 	}
 
 	for range w.Events {
 
 		db.Trigger(func() {
 
-			log.Println("File change detected")
+			msg := "File change detected"
+			log.Println(msg)
+			hub.Publish(msg)
 
 			err := b.Build()
 			if err != nil {
-				log.Println("Build failed — server will not restart")
+
+				msg := "Build failed — server will not restart"
+				log.Println(msg)
+				hub.Publish(msg)
+
 				return
 			}
 
+			msg = "Build successful"
+			log.Println(msg)
+			hub.Publish(msg)
+
 			err = p.Restart()
 			if err != nil {
-				log.Println("Failed to restart server:", err)
+
+				msg := "Failed to restart server"
+				log.Println(msg)
+				hub.Publish(msg)
+
+				return
 			}
+
+			msg = "Server restarted successfully"
+			log.Println(msg)
+			hub.Publish(msg)
 
 		})
 

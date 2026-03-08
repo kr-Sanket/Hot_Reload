@@ -4,11 +4,13 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"time"
 )
 
 type Manager struct {
-	cmd     *exec.Cmd
-	execCmd string
+	cmd       *exec.Cmd
+	execCmd   string
+	lastStart time.Time
 }
 
 func New(execCmd string) *Manager {
@@ -19,9 +21,16 @@ func New(execCmd string) *Manager {
 
 func (p *Manager) Start() error {
 
+	// Prevent rapid restart loops
+	if time.Since(p.lastStart) < 2*time.Second {
+		log.Println("Restart cooldown triggered")
+		time.Sleep(2 * time.Second)
+	}
+
 	log.Println("Starting server...")
 
 	cmd := exec.Command(p.execCmd)
+
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
@@ -31,6 +40,7 @@ func (p *Manager) Start() error {
 	}
 
 	p.cmd = cmd
+	p.lastStart = time.Now()
 
 	return nil
 }

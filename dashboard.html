@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>HotReload Logs</title>
+<style>
+body {
+    font-family: monospace;
+    background: #111;
+    color: #0f0;
+}
+#logs {
+    white-space: pre-wrap;
+}
+</style>
+</head>
+
+<body>
+
+<h2>HotReload Log Dashboard</h2>
+
+<div id="logs"></div>
+
+<script>
+
+const logBox = document.getElementById("logs");
+
+const evtSource = new EventSource("/logs");
+
+evtSource.onmessage = function(event) {
+    logBox.textContent += event.data + "\n";
+};
+
+</script>
+
+</body>
+</html>
