@@ -7,9 +7,12 @@ body {
     font-family: monospace;
     background: #111;
     color: #0f0;
+    padding: 20px;
 }
+
 #logs {
     white-space: pre-wrap;
+    line-height: 1.6;
 }
 </style>
 </head>
@@ -27,7 +30,11 @@ const logBox = document.getElementById("logs");
 const evtSource = new EventSource("/logs");
 
 evtSource.onmessage = function(event) {
+
     logBox.textContent += event.data + "\n";
+
+    // auto scroll
+    window.scrollTo(0, document.body.scrollHeight);
 };
 
 </script>

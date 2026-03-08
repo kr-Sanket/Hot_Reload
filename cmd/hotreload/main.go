@@ -25,7 +25,7 @@ func main() {
 
 	msg := "HotReload log dashboard running at http://localhost:8090"
 	log.Println(msg)
-	hub.Publish(msg)
+	hub.Publish(formatLog(msg))
 
 	w, err := watcher.New()
 	if err != nil {
@@ -46,7 +46,7 @@ func main() {
 
 	msg = "Watcher started"
 	log.Println(msg)
-	hub.Publish(msg)
+	hub.Publish(formatLog(msg))
 
 	// Initial build (required by assignment)
 	err = b.Build()
@@ -54,13 +54,13 @@ func main() {
 
 		msg = "Initial build failed"
 		log.Println(msg)
-		hub.Publish(msg)
+		hub.Publish(formatLog(msg))
 
 	} else {
 
 		msg = "Initial build successful"
 		log.Println(msg)
-		hub.Publish(msg)
+		hub.Publish(formatLog(msg))
 
 		err = p.Start()
 		if err != nil {
@@ -74,37 +74,41 @@ func main() {
 
 			msg := "File change detected"
 			log.Println(msg)
-			hub.Publish(msg)
+			hub.Publish(formatLog(msg))
 
 			err := b.Build()
 			if err != nil {
 
 				msg := "Build failed — server will not restart"
 				log.Println(msg)
-				hub.Publish(msg)
+				hub.Publish(formatLog(msg))
 
 				return
 			}
 
 			msg = "Build successful"
 			log.Println(msg)
-			hub.Publish(msg)
+			hub.Publish(formatLog(msg))
 
 			err = p.Restart()
 			if err != nil {
 
 				msg := "Failed to restart server"
 				log.Println(msg)
-				hub.Publish(msg)
+				hub.Publish(formatLog(msg))
 
 				return
 			}
 
 			msg = "Server restarted successfully"
 			log.Println(msg)
-			hub.Publish(msg)
+			hub.Publish(formatLog(msg))
 
 		})
 
 	}
+}
+
+func formatLog(msg string) string {
+	return time.Now().Format("15:04:05") + " | " + msg
 }
