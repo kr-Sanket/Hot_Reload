@@ -68,6 +68,25 @@ func (w *Watcher) Start() {
 				continue
 			}
 
+			// If a new directory is created, start watching it
+			if event.Op&fsnotify.Create != 0 {
+
+				info, err := os.Stat(event.Name)
+				if err == nil && info.IsDir() {
+
+					if shouldIgnore(event.Name) {
+						continue
+					}
+
+					err := w.fsWatcher.Add(event.Name)
+					if err != nil {
+						log.Println("Failed to watch new directory:", err)
+					} else {
+						log.Println("Watching new directory:", event.Name)
+					}
+				}
+			}
+
 			if event.Op&(fsnotify.Write|fsnotify.Create|fsnotify.Remove) != 0 {
 				w.Events <- struct{}{}
 			}
