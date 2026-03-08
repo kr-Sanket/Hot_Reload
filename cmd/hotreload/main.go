@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"os"
+	"time"
 
 	"github.com/kr-Sanket/hotreload/internal/config"
+	"github.com/kr-Sanket/hotreload/internal/debounce"
 	"github.com/kr-Sanket/hotreload/internal/watcher"
 )
 
@@ -13,8 +13,7 @@ func main() {
 
 	cfg, err := config.Parse()
 	if err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 
 	w, err := watcher.New()
@@ -27,7 +26,17 @@ func main() {
 		log.Fatal(err)
 	}
 
-	log.Println("Watcher started...")
+	db := debounce.New(300 * time.Millisecond)
 
-	w.Start()
+	go w.Start()
+
+	log.Println("Watcher started")
+
+	for range w.Events {
+
+		db.Trigger(func() {
+			log.Println("Change detected → rebuild triggered")
+		})
+
+	}
 }

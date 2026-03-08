@@ -10,6 +10,7 @@ import (
 
 type Watcher struct {
 	fsWatcher *fsnotify.Watcher
+	Events    chan struct{}
 }
 
 func New() (*Watcher, error) {
@@ -21,6 +22,7 @@ func New() (*Watcher, error) {
 
 	return &Watcher{
 		fsWatcher: w,
+		Events:    make(chan struct{}),
 	}, nil
 }
 
@@ -56,7 +58,9 @@ func (w *Watcher) Start() {
 				return
 			}
 
-			log.Println("File event:", event)
+			if event.Op&(fsnotify.Write|fsnotify.Create|fsnotify.Remove) != 0 {
+				w.Events <- struct{}{}
+			}
 
 		case err, ok := <-w.fsWatcher.Errors:
 			if !ok {
