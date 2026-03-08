@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/kr-Sanket/hotreload/internal/config"
+	"github.com/kr-Sanket/hotreload/internal/watcher"
 )
 
 func main() {
@@ -15,8 +17,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("HotReload starting with config:")
-	fmt.Println("Root:", cfg.Root)
-	fmt.Println("Build:", cfg.Build)
-	fmt.Println("Exec:", cfg.Exec)
+	w, err := watcher.New()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = w.Watch(cfg.Root)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Println("Watcher started...")
+
+	w.Start()
 }
