@@ -4,6 +4,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/kr-Sanket/hotreload/internal/builder"
 	"github.com/kr-Sanket/hotreload/internal/config"
 	"github.com/kr-Sanket/hotreload/internal/debounce"
 	"github.com/kr-Sanket/hotreload/internal/watcher"
@@ -26,6 +27,8 @@ func main() {
 		log.Fatal(err)
 	}
 
+	b := builder.New(cfg.Build)
+
 	db := debounce.New(300 * time.Millisecond)
 
 	go w.Start()
@@ -35,8 +38,15 @@ func main() {
 	for range w.Events {
 
 		db.Trigger(func() {
-			log.Println("Change detected → rebuild triggered")
-		})
 
+			log.Println("File change detected")
+
+			err := b.Build()
+			if err != nil {
+				log.Println("Build failed — server will not restart")
+				return
+			}
+
+		})
 	}
 }
