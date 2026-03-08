@@ -21,7 +21,8 @@ func (h *Hub) Publish(msg string) {
 }
 
 func (h *Hub) Subscribe() chan string {
-	ch := make(chan string)
+
+	ch := make(chan string, 50) // buffered channel
 
 	h.mu.Lock()
 	h.subscribers = append(h.subscribers, ch)

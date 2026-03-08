@@ -20,7 +20,9 @@ func StartServer(hub *Hub) {
 
 		ch := hub.Subscribe()
 
-		for msg := range ch {
+		for {
+			msg := <-ch
+
 			fmt.Fprintf(w, "data: %s\n\n", msg)
 			flusher.Flush()
 		}
