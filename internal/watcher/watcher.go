@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-
+	"strings"
 	"github.com/fsnotify/fsnotify"
 )
 
@@ -35,10 +35,16 @@ func (w *Watcher) Watch(root string) error {
 		}
 
 		if info.IsDir() {
+
+			if shouldIgnore(path) {
+				return filepath.SkipDir
+			}
+
 			err = w.fsWatcher.Add(path)
 			if err != nil {
 				return err
 			}
+
 			log.Println("Watching:", path)
 		}
 
@@ -58,6 +64,10 @@ func (w *Watcher) Start() {
 				return
 			}
 
+			if shouldIgnore(event.Name) {
+				continue
+			}
+
 			if event.Op&(fsnotify.Write|fsnotify.Create|fsnotify.Remove) != 0 {
 				w.Events <- struct{}{}
 			}
@@ -70,4 +80,21 @@ func (w *Watcher) Start() {
 			log.Println("Watcher error:", err)
 		}
 	}
+}
+
+func shouldIgnore(path string) bool {
+
+	ignored := []string{
+		".git",
+		"bin",
+		"node_modules",
+	}
+
+	for _, dir := range ignored {
+		if strings.Contains(path, dir) {
+			return true
+		}
+	}
+
+	return false
 }
