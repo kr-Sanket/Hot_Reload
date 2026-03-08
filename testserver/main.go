@@ -3,12 +3,13 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"time"
 )
 
 func main() {
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello from test server v3")
+		fmt.Fprintf(w, "Hello version 3 | time: %v", time.Now())
 	})
 
 	fmt.Println("Server running on http://localhost:8080")

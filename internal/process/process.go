@@ -21,8 +21,7 @@ func (p *Manager) Start() error {
 
 	log.Println("Starting server...")
 
-	cmd := exec.Command("cmd", "/C", p.execCmd)
-
+	cmd := exec.Command(p.execCmd)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
