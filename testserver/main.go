@@ -9,7 +9,7 @@ import (
 func main() {
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello version 45 | time: %v", time.Now())
+		fmt.Fprintf(w, "Hello version 4 | time: %v", time.Now())
 	})
 
 	fmt.Println("Server running on http://localhost:8080")
