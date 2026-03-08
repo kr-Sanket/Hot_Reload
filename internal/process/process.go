@@ -33,17 +33,12 @@ func (p *Manager) Start() error {
 
 	p.cmd = cmd
 
-	go func() {
-		cmd.Wait()
-		log.Println("Server process exited")
-	}()
-
 	return nil
 }
 
 func (p *Manager) Stop() {
 
-	if p.cmd == nil || p.cmd.Process == nil {
+	if p.cmd == nil {
 		return
 	}
 
@@ -54,6 +49,7 @@ func (p *Manager) Stop() {
 		log.Println("Server already stopped")
 	}
 
+	// Wait for process termination
 	p.cmd.Wait()
 
 	p.cmd = nil
