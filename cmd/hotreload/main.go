@@ -7,6 +7,7 @@ import (
 	"github.com/kr-Sanket/hotreload/internal/builder"
 	"github.com/kr-Sanket/hotreload/internal/config"
 	"github.com/kr-Sanket/hotreload/internal/debounce"
+	"github.com/kr-Sanket/hotreload/internal/process"
 	"github.com/kr-Sanket/hotreload/internal/watcher"
 )
 
@@ -28,12 +29,20 @@ func main() {
 	}
 
 	b := builder.New(cfg.Build)
+	p := process.New(cfg.Exec)
 
 	db := debounce.New(300 * time.Millisecond)
 
 	go w.Start()
 
 	log.Println("Watcher started")
+
+	err = b.Build()
+	if err != nil {
+		log.Println("Initial build failed")
+	} else {
+		p.Start()
+	}
 
 	for range w.Events {
 
@@ -47,6 +56,12 @@ func main() {
 				return
 			}
 
+			err = p.Restart()
+			if err != nil {
+				log.Println("Failed to restart server:", err)
+			}
+
 		})
+
 	}
 }
